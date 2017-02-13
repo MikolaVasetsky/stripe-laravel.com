@@ -267,7 +267,7 @@
            TableAjaxAccountsList.init();
 
 			$("#amount1, #amount2").inputmask('$0.99', {
-				numericInput: true
+				rightAlign: false
 			});
 
 

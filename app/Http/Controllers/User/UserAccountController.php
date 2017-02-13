@@ -35,7 +35,6 @@ class UserAccountController extends Controller {
 		//echo "<pre>";print_r($_POST);die;
 		
 		try{
-			
 			include(app_path() . Config::get("constants.STRIPE_INIT_PATH"));
 			$stripe_secret_key = AppSettings::stripe_secret_api_key();
 			\Stripe\Stripe::setApiKey($stripe_secret_key);
@@ -51,7 +50,9 @@ class UserAccountController extends Controller {
 			$bank_account = $customer->sources->retrieve($account_data->stripe_bank_id);
 
 			// verify the account
-			$result = $bank_account->verify(array('amounts' => array(trim(Input::get('amount1')),trim(Input::get('amount2')))));
+			$amount1 = (int)str_replace('_', '0', str_replace('$0.', '', trim(Input::get('amount1'))));
+			$amount2 = (int)str_replace('_', '0', str_replace('$0.', '', trim(Input::get('amount2'))));
+			$result = $bank_account->verify(array('amounts' => array($amount1,$amount2)));
 
 			$customer_info_object = json_encode($result);
 			$customer_info_array = json_decode($customer_info_object,true);	
