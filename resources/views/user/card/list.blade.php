@@ -123,11 +123,13 @@
 <script src="{{asset('public/plugins/jquery-validation/dist/jquery.validate.min.js')}}" type="text/javascript"></script>
 <script type="text/javascript" src="{{asset('public/scripts/core/datatable.js')}}"></script>
 <script type="text/javascript" src="{{asset('public/scripts/custom/user-table-ajax.js')}}"></script>
+<script type="text/javascript" src="{{asset('public/scripts/custom/custom.js')}}"></script>
 
 <!-- END PAGE LEVEL SCRIPTS -->
 <script>
     jQuery(document).ready(function($) {
         App.init();
+        $('#user_cards').DataTable();
 	});
 </script>
 @endsection
