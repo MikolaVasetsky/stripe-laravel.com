@@ -1,0 +1,60 @@
+{
+  "id": "evt_19QvowKA2EjQ7BLLYgwK0VOc",
+  "object": "event",
+  "api_version": "2016-07-06",
+  "created": 1481795198,
+  "data": {
+    "object": {
+      "id": "tr_19QvowKA2EjQ7BLLfDfUTiFi",
+      "object": "transfer",
+      "amount": 783,
+      "amount_reversed": 0,
+      "application_fee": null,
+      "balance_transaction": "txn_19QvowKA2EjQ7BLLgBwaUtkn",
+      "bank_account": {
+        "id": "ba_19BtLpKA2EjQ7BLLafPtqPNl",
+        "object": "bank_account",
+        "account_holder_name": null,
+        "account_holder_type": null,
+        "bank_name": "STATE DEPT FEDERAL CREDIT UNION",
+        "country": "US",
+        "currency": "usd",
+        "fingerprint": "542B3FGXdhOe34g5",
+        "last4": "8565",
+        "routing_number": "256075342",
+        "status": "new"
+      },
+      "created": 1481795198,
+      "currency": "usd",
+      "date": 1481846400,
+      "description": "STRIPE TRANSFER",
+      "destination": "ba_19BtLpKA2EjQ7BLLafPtqPNl",
+      "failure_code": null,
+      "failure_message": null,
+      "livemode": false,
+      "metadata": {
+      },
+      "method": "standard",
+      "recipient": null,
+      "reversals": {
+        "object": "list",
+        "data": [
+
+        ],
+        "has_more": false,
+        "total_count": 0,
+        "url": "/v1/transfers/tr_19QvowKA2EjQ7BLLfDfUTiFi/reversals"
+      },
+      "reversed": false,
+      "source_transaction": null,
+      "source_type": "bank_account",
+      "statement_descriptor": null,
+      "status": "in_transit",
+      "type": "bank_account"
+    }
+  },
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": null,
+  "type": "transfer.created"
+}
