@@ -54,11 +54,11 @@ var AccountVerificationFormValidations = function () {
 	            rules: {
 	                amount1: {
 	                    required: true,
-						number: true
+						// number: true
 	                },
 	                amount2: {
 	                    required: true,
-						number: true
+						// number: true
 	                }
 	            },
 

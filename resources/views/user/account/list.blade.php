@@ -250,6 +250,9 @@
 <script type="text/javascript" src="{{asset('public/plugins/data-tables/DT_bootstrap.js')}}"></script>
 <script type="text/javascript" src="{{asset('public/plugins/bootstrap-datepicker/js/bootstrap-datepicker.js')}}"></script>
 
+
+<script type="text/javascript" src="{{asset('public/plugins/jquery-inputmask/jquery.inputmask.bundle.min.js')}}"></script>
+
 <!-- END PAGE LEVEL PLUGINS -->
 <!-- BEGIN PAGE LEVEL SCRIPTS -->
 <script type="text/javascript" src="{{asset('public/scripts/core/app.js')}}"></script>
@@ -262,7 +265,12 @@
         jQuery(document).ready(function() {    
            App.init();
            TableAjaxAccountsList.init();
-       
+
+			$("#amount1, #amount2").inputmask('$0.99', {
+				numericInput: true
+			});
+
+
 		
 		$(document).on("click",".verification_button",function(){
 			var account_id = $(this).attr('id');
