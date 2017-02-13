@@ -106,10 +106,11 @@
 						</span>
 					</a>
 				</li>-->
-				@if( Request::is('user/dashboard/*') || Request::is('user/dashboard') )                                    
-					<li class="start active">                                @else                                     
-					<li>                                
-					@endif	
+				@if( Request::is('user/dashboard/*') || Request::is('user/dashboard') )
+					<li class="start active">
+				@else
+					<li>
+				@endif
 					<a href="javascript:;">
 						<i class="fa fa-home"></i>
 						<span class="title">
@@ -129,6 +130,35 @@
 							<a href="{{URL::to('/user/dashboard/create')}}">
 								<i class="fa fa-plus"></i>
 								New Account
+							</a>
+						</li>
+					</ul>
+				</li>
+
+				@if( Request::is('user/card/*') || Request::is('user/card') )
+					<li class="start active">
+				@else
+					<li>
+				@endif
+					<a href="javascript:;">
+						<i class="fa fa-home"></i>
+						<span class="title">
+							Card
+						</span>
+						<span class="arrow ">
+						</span>
+					</a>
+					<ul class="sub-menu">
+						<li>
+							<a href="{{route('user.card.index')}}">
+								<i class="fa fa-users"></i>
+								List Cards
+							</a>
+						</li>
+						<li>
+							<a href="{{route('user.card.create')}}">
+								<i class="fa fa-plus"></i>
+								New Card
 							</a>
 						</li>
 					</ul>

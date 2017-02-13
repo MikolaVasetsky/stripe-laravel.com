@@ -43,6 +43,8 @@ Route::group(['prefix' => 'user','middleware' => 'auth'], function () {
 	Route::get('delete/{id}', 'User\UserDashboardController@delete');
 	Route::controller('dashboard', 'User\UserDashboardController');
 	Route::controller('account', 'User\UserAccountController');
-	
+
+	Route::resource('card', 'CardController');
+
 });
 
