@@ -14,6 +14,9 @@ use App\UserAccounts;
 use App\PaymentHistory;
 use App\CommonFunctions;
 use App\AppSettings;
+use App\Card;
+use Illuminate\Http\Request;
+
 class AdminDashboardController extends Controller {
 
 	/*
@@ -45,65 +48,119 @@ class AdminDashboardController extends Controller {
 	public function getDashboard()
 	{
 		//$get_customer_list = User::where('role','=','customer')->lists('name','id');
-		$get_customer_list = DB::table('users')->join('users_accounts','users.id','=','users_accounts.user_id')->where('users_accounts.verification_status', '=', 'verified')->where('users.role','=','customer')->select('users.name','users.id')->distinct()->get();
-		
-		
+		$get_customer_list = DB::table('users')
+			->join('users_accounts','users.id','=','users_accounts.user_id')
+			->where('users_accounts.verification_status', '=', 'verified')
+			->where('users.role','=','customer')
+			->select('users.name','users.id')
+			->distinct()
+			->get();
+
 		$list_customers = array();
 		foreach($get_customer_list as $key=>$value){
 			$list_customers[$value->id] = $value->name;
 		}
+
+		$cardsUsers = Card::distinct()->groupBy('user_id')->select('user_id')->get();
+		foreach ($cardsUsers as $cardUser) {
+			$list_customers[$cardUser->user->id] = $cardUser->user->name;
+		}
+
 		//echo "<pre>";print_r($list_customers);
 		return view('admin.dashboard.charge_customer',array('customers_list'=>$list_customers));
 	}
-	
-	public function anyCustomeraccounts()
+
+
+
+
+	public function anyCustomeraccounts(Request $request)
 	{
-		$customer_id = $_POST['customer_id'];
-		$get_customer_list = UserAccounts::where('user_id','=',$customer_id)->where('verification_status','=','verified')->lists('account_number','id');
-		
-		echo json_encode($get_customer_list);
+		$customer_id = $request->get('customer_id');
+
+		/* get all users accounts */
+		$get_customer_list = UserAccounts::where('user_id','=',$customer_id)->where('verification_status','=','verified')->select('account_number','id')->get();
+		$count_get_customer_list = count($get_customer_list);
+		$array_result['account'] = $array_result['card'] = [];
+		for ( $i = 0; $i < $count_get_customer_list; ++$i ) {
+			$array_result['account'][$i]['id'] = $get_customer_list[$i]->id;
+			$array_result['account'][$i]['type'] = 'account';
+			$array_result['account'][$i]['text'] = 'Bank Account – ' . substr($get_customer_list[$i]->account_number, -4);
+		}
+
+		/*get all users cards*/
+		$cards = Card::where('user_id', $customer_id)->select('id', 'cardNumber')->get();
+		$count_cards = count($cards);
+		for ( $i = 0; $i < $count_cards; ++$i ) {
+			$array_result['card'][$i]['id'] = $cards[$i]->id;
+			$array_result['card'][$i]['type'] = 'card';
+			$array_result['card'][$i]['text'] = 'Credit Card – ' . $cards[$i]->cardNumber;
+		}
+
+		$array_result = array_merge($array_result['account'], $array_result['card']);
+
+		echo json_encode($array_result);
 	}
-	
-	
-	public function postCreatecharge()
+
+
+
+
+
+
+	public function postCreatecharge(Request $request)
 	{
 		
 		try{
-			
+			$account_id = $request->account_id;
+			$amount = (int)str_replace(array('$', '_', '.'), '', $request->amount);
+
 			include(app_path() . Config::get("constants.STRIPE_INIT_PATH"));
-			
 			$stripe_secret_key = AppSettings::stripe_secret_api_key();
-			
-			
 			\Stripe\Stripe::setApiKey($stripe_secret_key);
 
-			$account_id = Input::get('account_id');
-			$amount = Input::get('amount');
-			
-			$account_data = UserAccounts::find($account_id);	
-			$account_user_data = User::find($account_data->user_id);	
-			
+			if ( $request->type == 'account' ) { //create and save information about payment with account
+				$account_data = UserAccounts::find($account_id);
+				$account_user_data = User::find($account_data->user_id);
 
-			$result = \Stripe\Charge::create(array(
-			  "amount"   =>  $amount,
-			  "currency" => $account_data->currency,
-			  "customer" => $account_data->stripe_customer_id // Previously stored, then retrieved
-			  ));
-			
+				$result = \Stripe\Charge::create(array(
+				  "amount"   =>  $amount,
+				  "currency" => $account_data->currency,
+				  "customer" => $account_data->stripe_customer_id // Previously stored, then retrieved
+				));
 
-			$charge_info_object = json_encode($result);
-			$charge_info_array = json_decode($charge_info_object,true);	
-			
+				$charge_info_object = json_encode($result);
+				$charge_info_array = json_decode($charge_info_object,true);
 
-			$payment_history = new PaymentHistory;
-			$payment_history->user_account_id = $account_id;
-			$payment_history->amount = $amount;
-			$payment_history->currency = $account_data->currency;
-			$payment_history->payment_txn_id = $charge_info_array['id'];
-			$payment_history->payment_status = $charge_info_array['status'];
-			$payment_history->save();
-			if($payment_history->id){
-				return Redirect::to('admin/dashboard')->with('message','Amount Charged Successfully!!!');    
+				$payment_history = new PaymentHistory;
+				$payment_history->user_account_id = $account_id;
+				$payment_history->type = 'account';
+				$payment_history->amount = $amount;
+				$payment_history->currency = $account_data->currency;
+				$payment_history->payment_txn_id = $charge_info_array['id'];
+				$payment_history->payment_status = $charge_info_array['status'];
+				$payment_history->save();
+				if($payment_history->id){
+					return Redirect::to('admin/dashboard')->with('message','Amount Charged Successfully!!!');
+				}
+			} else if ( $request->type == 'card' ) { //create and save information about payment with card
+				$cardInfo = Card::find($account_id);
+
+				$result = \Stripe\Charge::create(array(
+					"amount" => $amount,
+					"currency" => "usd",
+					"customer" => $cardInfo->token,
+				));
+
+				$payment_history = new PaymentHistory;
+				$payment_history->user_account_id = $account_id;
+				$payment_history->type = 'card';
+				$payment_history->amount = $amount;
+				$payment_history->currency = 'USD';
+				$payment_history->payment_txn_id = $result->id;
+				$payment_history->payment_status = $result->status;
+				$payment_history->save();
+				if($payment_history->id){
+					return Redirect::to('admin/dashboard')->with('message','Amount Charged Successfully!!!');
+				}
 			}
 		}
 		catch(\Stripe\Error\Card $e) {
@@ -117,42 +174,41 @@ class AdminDashboardController extends Controller {
 			  print('Param is:' . $err['param'] . "\n");
 			  print('Message is:' . $err['message'] . "\n");*/
 			  return Redirect::back()->with('error',$err['message']);  
-			  
+
 			} catch (\Stripe\Error\RateLimit $e) {
 			  // Too many requests made to the API too quickly
 			  return Redirect::back()->with('error',$e->getMessage()); 
-			  
+
 			} catch (\Stripe\Error\InvalidRequest $e) {
 			  // Invalid parameters were supplied to Stripe's API
 			  return Redirect::back()->with('error',$e->getMessage()); 
-			  
+
 			} catch (\Stripe\Error\Authentication $e) {
 			  // Authentication with Stripe's API failed
 			  // (maybe you changed API keys recently)
 			  return Redirect::back()->with('error',$e->getMessage());
-			  
+
 			} catch (\Stripe\Error\ApiConnection $e) {
 			  // Network communication with Stripe failed
 			  return Redirect::back()->with('error',$e->getMessage());
-			  
+
 			} catch (\Stripe\Error\Base $e) {
 			  // Display a very generic error to the user, and maybe send
 			  // yourself an email
 			  return Redirect::back()->with('error',$e->getMessage());
-			  
+
 			} catch (Exception $e) {
 			  // Something else happened, completely unrelated to Stripe
 			  return Redirect::back()->with('error',$e->getMessage());
-			  
-			}	
+
+			}
 	}
-	
+
 	public function getTransactionhistory()
 	{
-	
 		return view('admin.dashboard.transaction_history');
 	}
-	
+
 	/*Transactions History*/
 	public function anyListtransactions()
 	{

@@ -8,6 +8,9 @@ $baseDir = dirname($vendorDir);
 return array(
     'AddAccountHolderNameToUsersAccounts' => $baseDir . '/database/migrations/2016_11_04_131145_add_account_holder_name_to_users_accounts.php',
     'AddRoleToUsers' => $baseDir . '/database/migrations/2016_11_03_105057_add_role_to_users.php',
+    'AddTokenToCards' => $baseDir . '/database/migrations/2017_02_14_111707_add_token_to_cards.php',
+    'AddTypeToPaymentHistory' => $baseDir . '/database/migrations/2017_02_14_152813_add_type_to_payment_history.php',
+    'AddUserIdToCards' => $baseDir . '/database/migrations/2017_02_14_121436_add_user_id_to_cards.php',
     'CreateCardsTable' => $baseDir . '/database/migrations/2017_02_13_132002_create_cards_table.php',
     'CreatePasswordResetsTable' => $baseDir . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
     'CreateUserAccountsTable' => $baseDir . '/database/migrations/2016_11_04_111234_create_user_accounts_table.php',

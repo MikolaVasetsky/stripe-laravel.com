@@ -39,7 +39,7 @@
 	    </div>
 	    <div class="portlet-body form">
 	        <div class="form-body">
-		        {!! Form::open(['url' => route('user.card.store'), 'class' => 'form-horizontal', 'method' => 'post']) !!}
+		        {!! Form::open(['url' => route('user.card.store'), 'class' => 'form-horizontal', 'method' => 'post', 'id' => 'add_card_form']) !!}
 
 					<div class="row">
 						<div class="col-md-6">
@@ -47,25 +47,6 @@
 								{!! Form::label('card_number', 'Card Number', ['class' => 'control-label col-md-3']) !!}
 								<div class="col-md-9">
 									{!!Form::text('card_number',"",array('class'=>'form-control','placeholder' => 'Card Number','id' => 'card_number')) !!}
-								</div>
-							</div>
-						</div>
-						<div class="col-md-6">
-							<div class="form-group">
-								{!! Form::label('card_brand', 'Card Brand', ['class' => 'control-label col-md-3']) !!}
-								<div class="col-md-9">
-									{!!Form::text('card_brand',"",array('class'=>'form-control','placeholder' => 'Card Brand','id' => 'card_brand')) !!}
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="row">
-						<div class="col-md-6">
-							<div class="form-group">
-								{!! Form::label('card_expiry', 'Card Expiry', ['class' => 'control-label col-md-3']) !!}
-								<div class="col-md-9">
-									{!!Form::text('card_expiry',"",array('class'=>'form-control','placeholder' => 'Card Expiry','id' => 'card_expiry')) !!}
 								</div>
 							</div>
 						</div>
@@ -89,11 +70,34 @@
 						</div>
 					</div>
 
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								{!! Form::label('expiry', 'Card Expiry', ['class' => 'control-label col-md-3']) !!}
+								<div class="col-md-9">
+									{!!Form::text('expiry',"",array('class'=>'form-control','placeholder' => 'Card Expiry','id' => 'expiry')) !!}
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								{!! Form::label('card_cvc', 'Card CVC', ['class' => 'control-label col-md-3']) !!}
+								<div class="col-md-9">
+									{!!Form::text('card_cvc',"",array('class'=>'form-control','placeholder' => 'Card CVC','id' => 'card_cvc')) !!}
+								</div>
+							</div>
+						</div>
+					</div>
+
 					<div class="form-actions fluid">
 						<div class="row">
 							<div class="col-md-6">
 								<div class="col-md-9">
-									<button class="btn blue" type="button" id="save_card"><i style="display:none;float:right;vertical-align:middle" id="spinner" class="fa fa-spinner fa-spin"></i>&nbsp;Save</button>
+									<input type="submit" class="btn blue" value="Save">
+									<i style="display:none;" id="spinner" class="fa fa-spinner fa-spin"></i>
+									<div class="has-error">
+										<span class="help-block" id="error_add_card"></span>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -109,13 +113,15 @@
 	<script src="{{asset('public/scripts/core/app.js')}}" type="text/javascript"></script>
 	<script src="{{asset('public/plugins/jquery-validation/dist/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script type="text/javascript" src="{{asset('public/plugins/jquery-inputmask/jquery.inputmask.bundle.min.js')}}"></script>
-	{{-- <script type="text/javascript" src="{{asset('public/scripts/custom/user-custom.js')}}"></script> --}}
+	<script type="text/javascript" src="{{asset('public/scripts/custom/custom.js')}}"></script>
 
 	<script>
 		jQuery(document).ready(function() {
 			App.init();
 
-			$("#card_expiry").inputmask("y/m", {
+			Stripe.setPublishableKey('{{$stripePublicKey}}');
+
+			$("#expiry").inputmask("y/m", {
             	"placeholder": "yyyy/mm"
         	});
 

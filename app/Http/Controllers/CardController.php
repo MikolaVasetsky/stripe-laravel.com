@@ -7,6 +7,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Card;
+use App\AppSettings;
+use Illuminate\Support\Facades\Config;
+
+use Illuminate\Support\Facades\Auth;
 
 class CardController extends Controller {
 
@@ -17,7 +21,7 @@ class CardController extends Controller {
 	 */
 	public function index()
 	{
-        $cards = Card::all();
+        $cards = Auth::user()->card()->get();
         return view('user.card.list', compact('cards'));
 	}
 
@@ -28,7 +32,8 @@ class CardController extends Controller {
 	 */
 	public function create()
 	{
-		return view('user.card.create');
+		$stripePublicKey = AppSettings::stripe_public_api_key();
+		return view('user.card.create', compact('stripePublicKey'));
 	}
 
 	/**
@@ -36,9 +41,26 @@ class CardController extends Controller {
 	 *
 	 * @return Response
 	 */
-	public function store()
+	public function store(Request $request)
 	{
-		//
+		include(app_path() . Config::get("constants.STRIPE_INIT_PATH"));
+		$stripe_secret_key = AppSettings::stripe_secret_api_key();
+		\Stripe\Stripe::setApiKey($stripe_secret_key);
+		$request->token = \Stripe\Customer::create(array(
+			"email" => Auth::user()->email,
+			"source" => $request->token,
+		))->id;
+
+		$cardArray = [
+			'cardNumber' => $request->cardNumber,
+			'expiry' => $request->expiry,
+			'brand' => $request->brand,
+			'country' => $request->country,
+			'token' => $request->token,
+		];
+
+        Auth::user()->card()->create($cardArray);
+        return redirect()->route('user.card.index');
 	}
 
 	/**

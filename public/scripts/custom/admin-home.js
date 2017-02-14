@@ -20,7 +20,7 @@ var ChargeCustomerFormValidations = function () {
 	                },
 	                amount: {
 	                    required: true,
-						number: true
+						// number: true
 	                }
 	            },
 
@@ -60,11 +60,8 @@ var GetCustomerAccounts = function () {
 			   var accounts_list="<option value=''>Select Account</option>";
 			   if(data!=="")
 			   {
-				   //console.log("Her"+data);
-					
-					$.each(data, function( id, value ) {
-						
-						accounts_list+='<option value='+id+'>'+value+'</option>';
+				    $.each(data, function( id, value ) {
+						accounts_list+='<option value='+value.id+' data-type='+value.type+'>'+value.text+'</option>';
 					});
 					jQuery('#account_id').html(accounts_list);
 					jQuery(".dataTables_processing").hide();

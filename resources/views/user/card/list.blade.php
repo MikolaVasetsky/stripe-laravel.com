@@ -77,7 +77,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								@forelse($cards as $card)
+								@foreach($cards as $card)
 									<tr>
 										<td>{{$card->id}}</td>
 										<td>{{$card->cardNumber}}</td>
@@ -93,9 +93,7 @@
 											</form>
 										</td>
 									</tr>
-									@empty
-										<h4>No Record Data</h4>
-								@endforelse
+								@endforeach
 							</tbody>
 						</table>
 					</div>
