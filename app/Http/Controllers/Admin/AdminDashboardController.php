@@ -101,14 +101,8 @@ class AdminDashboardController extends Controller {
 		echo json_encode($array_result);
 	}
 
-
-
-
-
-
 	public function postCreatecharge(Request $request)
 	{
-		
 		try{
 			$account_id = $request->account_id;
 			$amount = (int)str_replace(array('$', '_', '.'), '', $request->amount);
@@ -137,6 +131,7 @@ class AdminDashboardController extends Controller {
 				$payment_history->currency = $account_data->currency;
 				$payment_history->payment_txn_id = $charge_info_array['id'];
 				$payment_history->payment_status = $charge_info_array['status'];
+				$payment_history->user_id = $account_data->user_id;
 				$payment_history->save();
 				if($payment_history->id){
 					return Redirect::to('admin/dashboard')->with('message','Amount Charged Successfully!!!');
@@ -157,6 +152,7 @@ class AdminDashboardController extends Controller {
 				$payment_history->currency = 'USD';
 				$payment_history->payment_txn_id = $result->id;
 				$payment_history->payment_status = $result->status;
+				$payment_history->user_id = $cardInfo->user_id;
 				$payment_history->save();
 				if($payment_history->id){
 					return Redirect::to('admin/dashboard')->with('message','Amount Charged Successfully!!!');
@@ -206,7 +202,41 @@ class AdminDashboardController extends Controller {
 
 	public function getTransactionhistory()
 	{
-		return view('admin.dashboard.transaction_history');
+		$res = PaymentHistory::all(); 
+		$countRes = count($res);
+		$historyArray = [];
+		for ( $i = 0; $i < $countRes; ++$i ) {
+			$historyArray[$i] = [
+				'id' => $res[$i]->id,
+				'amount' => $res[$i]->amount/100,
+				'currency' => $res[$i]->currency,
+				'paymentId' => $res[$i]->payment_txn_id,
+				'paymentStatus' => $res[$i]->payment_status,
+				'createdAt' => CommonFunctions::formated_date_time($res[$i]->created_at),
+			];
+			if ( $res[$i]->type == 'card' ) {
+				$cardRes = Card::join('users', 'users.id', '=', 'cards.user_id')->find($res[$i]->user_account_id);
+				$historyArray[$i]['userId'] = $res[$i]->user_id;
+				if ( $cardRes ) {
+					$historyArray[$i]['userName'] = $cardRes->name;
+					$historyArray[$i]['number'] = 'Credit Card - ' . $cardRes->cardNumber;
+				} else {
+					$historyArray[$i]['userName'] = 'User deleted card';
+					$historyArray[$i]['number'] = 'User deleted card';
+				}
+			} else {
+				$accountRes = UserAccounts::join('users', 'users.id', '=', 'users_accounts.user_id')->find($res[$i]->user_account_id);
+				$historyArray[$i]['userId'] = $res[$i]->user_id;
+				if ( $accountRes ) {
+					$historyArray[$i]['userName'] = $accountRes->name;
+					$historyArray[$i]['number'] = 'Bank Account - ' . substr($accountRes->account_number, -4);
+				} else {
+					$historyArray[$i]['userName'] = 'User deleted card';
+					$historyArray[$i]['number'] = 'User deleted card';
+				}
+			}
+		}
+		return view('admin.dashboard.transaction_history', compact('historyArray'));
 	}
 
 	/*Transactions History*/

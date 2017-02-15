@@ -306,6 +306,33 @@ var TableAjaxCustomerAccountsList = function () {
 }();
 
 
+
+var TableAjaxCustomerCardsList = function () {
+    var handleRecords = function(user_id) {
+        var grid = new Datatable();
+            grid.init({
+                src: $("#user_cards_datatable"),
+                dataTable: {
+                    "aLengthMenu": [
+                        [20, 50, 100, 150, -1],
+                        [20, 50, 100, 150, "All"] // change per page values here
+                    ],
+                    "iDisplayLength": 20, // default record count per page
+                    "bServerSide": true, // server side processing
+                    "sAjaxSource": project_url+"/admin/customer/usercards/"+user_id, // ajax source
+                    "aaSorting": [[ 5, "desc" ]] // set first column as a default sort by asc
+                }
+            });
+    }
+    return {
+        //main function to initiate the module
+        init: function (user_id) {
+            handleRecords(user_id);
+        }
+    };
+}();
+
+
 var ChargeAmountFormValidations = function () {
 
 

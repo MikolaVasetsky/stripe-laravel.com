@@ -14,6 +14,7 @@ use App\UserAccounts;
 use App\PaymentHistory;
 use App\CommonFunctions;
 use App\AppSettings;
+use App\Card;
 class AdminCustomerController extends Controller {
 
 	/*
@@ -335,8 +336,73 @@ class AdminCustomerController extends Controller {
 		  
 		  echo json_encode($records);
 	}
-	
-	
+
+
+	/*View User Cards*/
+	public function anyUsercards($id)
+	{
+		$query = Card::where('user_id','=',$id);
+		$iTotalRecords = $query->get()->count();
+		$iDisplayLength = intval($_REQUEST['iDisplayLength']);
+		$iDisplayLength = $iDisplayLength < 0 ? $iTotalRecords : $iDisplayLength; 
+		$iDisplayStart = intval($_REQUEST['iDisplayStart']);
+		$sEcho = intval($_REQUEST['sEcho']);
+
+		$records = array();
+		$records["aaData"] = array();
+
+		$end = $iDisplayStart + $iDisplayLength;
+		$end = $end > $iTotalRecords ? $iTotalRecords : $end;
+
+		$sort_col           = Input::get('iSortCol_0');
+		$sort_order         = Input::get('sSortDir_0');
+
+		$order_by = "cards.id";
+
+		if($sort_col == 1)
+		{
+			$order_by="cards.cardNumber";
+		}
+		else if($sort_col==2){
+			$order_by="cards.expiry";
+		}
+		else if($sort_col==3){
+			$order_by="cards.brand";
+		}
+		else if($sort_col==4){
+			$order_by="cards.country";
+		}
+		else if($sort_col==5){
+			$order_by="cards.created_at";
+		}
+
+		$allrecords	= $query->orderBy($order_by,$sort_order)->get();
+
+		foreach($allrecords as $key=>$value) {
+			$id = ($key + 1);
+			$records["aaData"][] = array(
+				$id,
+				$value->cardNumber,
+				$value->expiry,
+				$value->brand,
+				$value->country,
+				CommonFunctions::formated_date_time($value->created_at),
+				// '<a href="'.URL::to('/admin/customer/paymenthistorycard/'.$value->id).'" class="btn green"><i class="fa fa-search"></i> View Card Transaction History</a>'
+		   );
+		}
+
+		if (isset($_REQUEST["sAction"]) && $_REQUEST["sAction"] == "group_action") {
+			$records["sStatus"] = "OK"; // pass custom message(useful for getting status of group actions)
+			$records["sMessage"] = "Group action successfully has been completed. Well done!"; // pass custom message(useful for getting status of group actions)
+		}
+
+		$records["sEcho"] = $sEcho;
+		$records["iTotalRecords"] = $iTotalRecords;
+		$records["iTotalDisplayRecords"] = $iTotalRecords;
+
+		echo json_encode($records);
+	}
+
 	/*Used to charge amount to a account*/
 	public function postCharge()
 	{
@@ -426,7 +492,7 @@ class AdminCustomerController extends Controller {
 	{
 		$user_account_info = UserAccounts::find($id);
 		$user_info = User::find($user_account_info->user_id);
-		
+
 		return view('admin.customer.payment_history',array('user_info'=>$user_info, 'user_account_info'=>$user_account_info));
 	}
 	
@@ -493,31 +559,28 @@ class AdminCustomerController extends Controller {
 		  
 		  echo json_encode($records);
 	}
-	
-	
-	
+
+
 	/*View User Payment History*/
 	public function anyUserpaymenthistory($id)
 	{
-		//echo $id;die;
-	  //$iTotalRecords = DB::table('payment_history')->join('users_accounts', 'users_accounts.id', '=', 'payment_history.user_account_id')->where('users_accounts.user_id','=',$id)->select('payment_history.*')->count();
-	  
-	  $query = DB::table('payment_history')->join('users_accounts', 'users_accounts.id', '=', 'payment_history.user_account_id')->where('users_accounts.user_id','=',$id)->select('payment_history.*');
+	  $query = PaymentHistory::where('user_id', $id);
 	  $iTotalRecords = $query->count();
+
 	  $iDisplayLength = intval($_REQUEST['iDisplayLength']);
 	  $iDisplayLength = $iDisplayLength < 0 ? $iTotalRecords : $iDisplayLength; 
 	  $iDisplayStart = intval($_REQUEST['iDisplayStart']);
 	  $sEcho = intval($_REQUEST['sEcho']);
-	  
+
 	  $records = array();
 	  $records["aaData"] = array(); 
 
 	  $end = $iDisplayStart + $iDisplayLength;
 	  $end = $end > $iTotalRecords ? $iTotalRecords : $end;
-		
-			$sort_col           = Input::get('iSortCol_0');
-		$sort_order         = Input::get('sSortDir_0'); 
-		
+
+		$sort_col           = Input::get('iSortCol_0');
+		$sort_order         = Input::get('sSortDir_0');
+
 		$order_by = "payment_history.id";
 
 		if($sort_col == 1)
@@ -532,23 +595,20 @@ class AdminCustomerController extends Controller {
 		}
 		else if($sort_col==4){
 			$order_by="payment_history.payment_status";
-		}	
-		
-		
+		}
+
 		$allrecords	= $query->orderBy($order_by,$sort_order)->get();
-		 //echo "<pre>";print_r($allrecords);die;
 		  foreach($allrecords as $key=>$value) {
-			
 			$id = ($key + 1);
 			$records["aaData"][] = array(
 			  $id,
-			  $value->amount,
+			  $value->amount/100,
 			  $value->currency,
 			  $value->payment_txn_id,
 			  $value->payment_status,
 			  CommonFunctions::formated_date_time($value->created_at),
-	
-		   );
+
+		   	);
 		  }
 
 		  if (isset($_REQUEST["sAction"]) && $_REQUEST["sAction"] == "group_action") {
@@ -559,7 +619,7 @@ class AdminCustomerController extends Controller {
 		  $records["sEcho"] = $sEcho;
 		  $records["iTotalRecords"] = $iTotalRecords;
 		  $records["iTotalDisplayRecords"] = $iTotalRecords;
-		  
+
 		  echo json_encode($records);
 	}
 

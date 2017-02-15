@@ -277,8 +277,59 @@
 					<!-- End: life time stats -->
 				</div>
 			</div>
-			
-			
+
+
+
+			<!-- BEGIN PAGE CONTENT-->
+			<div class="row">
+				<div class="col-md-12">
+					<!-- Begin: life time stats -->
+					<div class="portlet">
+						<div class="portlet-title">
+							<div class="caption">
+								<i class="fa fa-list"></i>Cards Listing
+							</div>
+						</div>
+						<div class="portlet-body">
+							<div class="table-container">
+								<table class="table table-striped table-bordered table-hover" id="user_cards_datatable">
+									<thead>
+										<tr role="row" class="heading">
+											<th width="5%">
+										 		Index&nbsp;#
+											</th>
+											<th width="15%">
+												Card.No.
+											</th>
+											<th width="15%">
+												Expiry month/year
+											</th>
+											<th width="10%">
+												Brand
+											</th>
+											<th width="10%">
+												Country
+											</th>
+											<th width="10%">
+												Add date
+											</th>
+											<!--
+											<th width="10%">
+												Card Transaction History
+											</th>
+											-->
+										</tr>
+									</thead>
+									<tbody>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					<!-- End: life time stats -->
+				</div>
+			</div>
+
 
 
 @endsection
@@ -302,6 +353,7 @@
            App.init();
 
 			TableAjaxCustomerAccountsList.init({{$user->id}});
+			TableAjaxCustomerCardsList.init({{$user->id}});
 			
 			UpdateCustomerFormValidations.init();
 			

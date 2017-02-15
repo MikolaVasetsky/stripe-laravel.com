@@ -11,6 +11,7 @@ return array(
     'AddTokenToCards' => $baseDir . '/database/migrations/2017_02_14_111707_add_token_to_cards.php',
     'AddTypeToPaymentHistory' => $baseDir . '/database/migrations/2017_02_14_152813_add_type_to_payment_history.php',
     'AddUserIdToCards' => $baseDir . '/database/migrations/2017_02_14_121436_add_user_id_to_cards.php',
+    'AddUserIdToHistoryPayment' => $baseDir . '/database/migrations/2017_02_15_130418_add_user_id_to_history_payment.php',
     'CreateCardsTable' => $baseDir . '/database/migrations/2017_02_13_132002_create_cards_table.php',
     'CreatePasswordResetsTable' => $baseDir . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
     'CreateUserAccountsTable' => $baseDir . '/database/migrations/2016_11_04_111234_create_user_accounts_table.php',
