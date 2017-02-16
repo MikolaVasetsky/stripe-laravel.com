@@ -123,7 +123,7 @@
 		   ChargeCustomerFormValidations.init();
 		   GetCustomerAccounts.init();
 
-			$("#Amount").inputmask('$999.999.999.99', {
+			$("#Amount").inputmask('$999.999.99', {
 	            numericInput: true,
 	            rightAlignNumerics: false,
 	            greedy: false,
